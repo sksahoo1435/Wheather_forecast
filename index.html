@@ -1,20 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Weather Forecast</title>
     <link href="./src/styles.css" rel="stylesheet">
 </head>
-<body class="bg-gradient-to-r from-blue-200 via-blue-400 to-blue-600 text-gray-800 font-sans">
-    <div class="flex items-center justify-center min-h-screen">
-        <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
-            <h1 class="text-3xl font-extrabold text-center text-blue-600 mb-6">Weather Forecast</h1>
-            <input id="cityInput" type="text" placeholder="Enter city" class="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4" />
-            <button id="fetchWeatherBtn" class="w-full bg-blue-600 text-white p-3 rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">Get Weather</button>
-            <div id="weatherResult" class="mt-4 text-center text-lg"></div>
+
+<body class="bg-gray-200 text-gray-800 font-sans flex items-center justify-center min-h-screen">
+    <div class="relative bg-white p-8 rounded-lg shadow-xl w-full max-w-md">
+        <h1 class="text-4xl font-bold text-gray-900 mb-6 text-center">Weather Forecast</h1>
+        <div class="relative">
+            <input id="cityInput" type="text" placeholder="Enter city" class="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            <div id="cityDropdown" class="dropdown"></div>
         </div>
+        <button id="fetchWeatherBtn" class="w-full bg-blue-600 text-white p-3 rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 mt-4">Get Weather</button>
+        <button id="fetchLocationBtn" class="w-full bg-blue-500 text-white p-3 rounded-lg shadow-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 mt-2">Get Current Location Weather</button>
+        <div id="weatherResult" class="mt-6 text-center text-lg"></div>
+        <div id="forecast" class="grid grid-cols-1 gap-4 mt-6"></div>
     </div>
-   
+
+    <script src="src/main.js"></script>
 </body>
+
 </html>
