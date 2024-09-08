@@ -1,0 +1,11 @@
+body {
+    font-family: 'Arial', sans-serif;
+}
+
+#weatherDisplay {
+    min-height: 150px;
+}
+
+.hidden {
+    display: none;
+}
