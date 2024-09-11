@@ -16,6 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
         updateDropdown(recentCitiesList);
         dropdown.classList.remove('hidden'); // Show dropdown if there are recent cities on load
     }
+    weatherResult.innerHTML = `<p class="text-stone-50">Please select a city</p>`
 });
 
 
