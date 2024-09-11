@@ -4,3 +4,5 @@
 4:- Used a apikey from openweathermap.
 5:- Fetch the data city wise (need to enter an city to see the weather of city or use current location).
 6:- The recent searched citi's are stored in local storage , if the value is empty then there is no recent city section else we show it .And  you can choose city from there.
+
+7:- github url : https://github.com/sksahoo1435/Wheather_forecast
