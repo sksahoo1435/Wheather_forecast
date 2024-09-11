@@ -9,32 +9,45 @@ const weatherResult = document.getElementById('weatherResult');
 const forecast = document.getElementById('forecast');
 const dropdown = document.getElementById('cityDropdown');
 
-// Event listener for input changes in the city input field
-cityInput.addEventListener('input', function () {
-    const query = cityInput.value.trim(); // Get user input and remove extra spaces
-    if (query.length > 0) {
-        // Retrieve recent cities from local storage and filter based on input
-        const recentCitiesList = JSON.parse(localStorage.getItem('recentCities')) || [];
-        const filteredCities = recentCitiesList.filter(city => city.toLowerCase().includes(query.toLowerCase()));
-        updateDropdown(filteredCities); // Update the dropdown with filtered cities
-    } else {
-        dropdown.classList.add('hidden'); // Hide dropdown if input is empty
+// Check and display recent cities from local storage on page load
+document.addEventListener('DOMContentLoaded', () => {
+    const recentCitiesList = JSON.parse(localStorage.getItem('recentCities')) || [];
+    if (recentCitiesList.length > 0) {
+        updateDropdown(recentCitiesList);
+        dropdown.classList.remove('hidden'); // Show dropdown if there are recent cities on load
     }
 });
+
+
+// Event listener for input changes in the city input field
+cityInput.addEventListener('input', function () {
+    const query = cityInput.value.trim();
+    const recentCitiesList = JSON.parse(localStorage.getItem('recentCities')) || [];
+    
+    if (query.length > 0) {
+        const filteredCities = recentCitiesList.filter(city => city.toLowerCase().includes(query.toLowerCase()));
+        updateDropdown(filteredCities); // Update dropdown with filtered results
+    } else {
+        updateDropdown(recentCitiesList); // If input is empty, show all recent cities
+    }
+});
+
+// Function to update the dropdown with the list of recent cities
+function updateDropdown(cities) {
+    if (cities.length > 0) {
+        dropdown.innerHTML = cities.map(city => `<div class="dropdown-item p-2 hover:bg-gray-200 cursor-pointer">${city}</div>`).join('');
+        dropdown.classList.remove('hidden'); // Show dropdown when there are cities
+    } else {
+        dropdown.classList.add('hidden'); // Hide dropdown if no recent cities
+    }
+}
+
 
 // Event listener for selecting a city from the dropdown
 dropdown.addEventListener('click', function (e) {
-    if (e.target.tagName === 'DIV') {
+    if (e.target && e.target.matches('.dropdown-item')) {
         cityInput.value = e.target.textContent; // Set the selected city in the input field
         fetchWeatherBtn.click(); // Trigger weather fetch after city selection
-        dropdown.classList.add('hidden'); // Hide dropdown after selection
-    }
-});
-
-// Hide the dropdown when clicking outside of it
-document.addEventListener('click', function (e) {
-    if (!dropdown.contains(e.target) && e.target !== cityInput) {
-        dropdown.classList.add('hidden'); // Hide dropdown if clicked outside
     }
 });
 
@@ -96,11 +109,10 @@ fetchLocationBtn.addEventListener('click', async () => {
     }
 });
 
-// Fetch weather data for a specific city
 async function fetchWeatherData(city) {
     const response = await fetch(`${apiUrl}/weather?q=${city}&appid=${apiKey}&units=metric`);
-    if (!response.ok) throw new Error('City not found'); // Error handling if city is not found
-    return await response.json(); // Parse and return JSON data
+    if (!response.ok) throw new Error('City not found'); 
+    return await response.json(); 
 }
 
 // Fetch weather data using coordinates (latitude and longitude)
@@ -117,10 +129,18 @@ async function fetchForecastData(city) {
     return await response.json(); // Parse and return JSON data
 }
 
-// Display current weather data
+// Display current weather data with icons
 function displayWeatherData(data) {
+    const iconCode = data.weather[0].icon; // Get weather icon code
+    const iconUrl = `https://openweathermap.org/img/wn/${iconCode}@2x.png`; // Build icon URL
+
     weatherResult.innerHTML = `
-        <h2 class="text-2xl font-semibold">${data.name} (${new Date().toLocaleDateString()})</h2>
+        <div class="relative flex flex-row gap-2 h-10">
+            <h2 class="text-2xl font-semibold">${data.name} (${new Date().toLocaleDateString()})</h2>
+            <div class="relative h-7 w-7 rounded-3xl bg-violet-100 m-1 flex items-center justify-center">
+                <img src="${iconUrl}" alt="Weather Icon" class="w-6 h-6 mx-auto"/> 
+            </div>
+        </div>
         <p>Temperature: ${data.main.temp}°C</p>
         <p>Weather: ${data.weather[0].description}</p>
         <p>Humidity: ${data.main.humidity}%</p>
@@ -128,7 +148,8 @@ function displayWeatherData(data) {
     `;
 }
 
-// Display forecast data for upcoming days, excluding current day
+
+// Display forecast data for upcoming days, including weather icons
 function displayForecastData(data) {
     const currentDate = new Date().toLocaleDateString(); // Get the current date string
 
@@ -143,17 +164,30 @@ function displayForecastData(data) {
         }
     });
 
-    // Display filtered forecast data
-    forecast.innerHTML = Object.values(forecastByDay).map(item => `
-        <div class="bg-gray-200 p-2 rounded-lg shadow border border-indigo-600">
-            <p class="font-bold">${new Date(item.dt * 1000).toLocaleDateString()}</p>
-            <p>Temperature: ${item.main.temp}°C</p>
-            <p>Weather: ${item.weather[0].description}</p>
-            <p>Humidity: ${item.main.humidity}%</p>
-            <p>Wind Speed: ${item.wind.speed} m/s</p>
-        </div>
-    `).join(''); // Join the results into a single HTML string
+    // Display filtered forecast data, including weather icons
+    forecast.innerHTML = Object.values(forecastByDay).map(item => {
+        const iconCode = item.weather[0].icon; // Get the weather icon code
+        const iconUrl = `https://openweathermap.org/img/wn/${iconCode}@2x.png`; // Build icon URL
+
+        return `
+            <div class="bg-gray-100 p-2 rounded-lg shadow border text-left border-indigo-600">
+                <div class="relative flex flex-row gap-2 h-10">
+                    <p class="font-bold">${new Date(item.dt * 1000).toLocaleDateString()}</p>
+                    <div class="relative h-7 w-7 rounded-3xl bg-violet-300 flex items-center justify-center">
+                        <img src="${iconUrl}" alt="Weather Icon" class="w-6 h-6 mx-auto"/> 
+                    </div>
+                </div>
+                <div class="flex flex-col space-x">
+                    <p>Temperature: ${item.main.temp}°C</p>
+                    <p>Weather: ${item.weather[0].description}</p>
+                    <p>Humidity: ${item.main.humidity}%</p>
+                    <p>Wind Speed: ${item.wind.speed} m/s</p>
+                </div>
+            </div>
+        `;
+    }).join(''); // Join the results into a single HTML string
 }
+
 
 // Display an enhanced error message and clear the forecast
 function displayErrorMessage(message) {
@@ -164,18 +198,33 @@ function displayErrorMessage(message) {
     forecast.innerHTML = ''; // Clear forecast section when error occurs
 }
 
-// Add a city to the recent searches list and store in localStorage
+// Function to add a city to the recent searches list
 function addRecentCity(city) {
-    const recentCitiesList = JSON.parse(localStorage.getItem('recentCities')) || [];
+    let recentCitiesList = JSON.parse(localStorage.getItem('recentCities')) || [];
     if (!recentCitiesList.includes(city)) {
-        recentCitiesList.push(city); // Add the city if it's not already in the list
-        localStorage.setItem('recentCities', JSON.stringify(recentCitiesList)); // Save updated list to localStorage
-        updateDropdown(recentCitiesList); // Update the dropdown with the recent cities
+        recentCitiesList.push(city); // Add the city if not already in the list
+        localStorage.setItem('recentCities', JSON.stringify(recentCitiesList));
+        updateDropdown(recentCitiesList); // Update dropdown with new city
+        dropdown.classList.remove('hidden'); // Ensure dropdown remains visible
     }
 }
 
-// Update the dropdown with the list of filtered cities
+// Update the dropdown with the list of recent cities
 function updateDropdown(cities) {
-    dropdown.innerHTML = cities.map(city => `<div>${city}</div>`).join(''); // Display each city in the dropdown
-    dropdown.classList.remove('hidden'); // Show the dropdown
+    if (cities.length > 0) {
+        dropdown.innerHTML = cities.map(city => `<div class="dropdown-item">${city}</div>`).join('');
+        dropdown.classList.remove('hidden'); // Show dropdown when there are cities
+    } else {
+        dropdown.classList.add('hidden'); // Hide dropdown if no recent cities
+    }
 }
+
+// Hide dropdown only if there are no cities in local storage or input field is cleared
+document.addEventListener('click', function (e) {
+    if (!dropdown.contains(e.target) && e.target !== cityInput) {
+        const recentCitiesList = JSON.parse(localStorage.getItem('recentCities')) || [];
+        if (recentCitiesList.length === 0) {
+            dropdown.classList.add('hidden'); // Hide dropdown if no recent cities
+        }
+    }
+});
